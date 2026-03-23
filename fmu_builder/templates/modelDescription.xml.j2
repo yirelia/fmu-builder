@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+    fmiVersion="2.0"
+    modelName="<< model_name >>"
+    guid="<< guid >>"
+    description="<< description >>"
+    generationTool="fmu-builder"
+    variableNamingConvention="flat">
+
+    <CoSimulation modelIdentifier="<< model_identifier >>" />
+
+    <ModelVariables>
+<% for var in variables %>
+        <ScalarVariable name="<< var.name >>" valueReference="<< var.vr >>" causality="<< var.causality >>" variability="<< var.variability >>"<% if var.initial %> initial="<< var.initial >>"<% endif %> description="<< var.description >>">
+<% if var.start is not none %>
+            <Real start="<< var.start >>"/>
+<% else %>
+            <Real/>
+<% endif %>
+        </ScalarVariable>
+<% endfor %>
+    </ModelVariables>
+
+    <ModelStructure>
+        <Outputs>
+<% for idx in output_indices %>
+            <Unknown index="<< idx >>"/>
+<% endfor %>
+        </Outputs>
+    </ModelStructure>
+
+</fmiModelDescription>

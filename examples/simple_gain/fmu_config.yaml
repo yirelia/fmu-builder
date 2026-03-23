@@ -1,0 +1,32 @@
+version: 1
+
+fmu:
+  name: SimpleGain
+  description: "Simple gain model: y = K * x"
+
+source:
+  type: c_source
+  files:
+    - gain.c
+    - gain.h
+
+interface:
+  inputs:
+    - name: x
+      description: "Input signal"
+
+  outputs:
+    - name: y
+      description: "Output signal (y = K * x)"
+
+  parameters:
+    - name: K
+      description: "Gain factor"
+      default: 1.0
+
+  step_function:
+    name: gain
+    args:
+      - map: input.x
+      - map: param.K
+    return: output.y

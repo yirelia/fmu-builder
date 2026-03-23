@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fmu-builder"
+version = "0.1.0"
+description = "Build FMI 2.0 Co-Simulation FMUs from C source code"
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.9.0",
+    "pyyaml>=6.0",
+    "pydantic>=2.0",
+    "jinja2>=3.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "fmpy>=0.3",
+]
+
+[project.scripts]
+fmu-builder = "fmu_builder.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["fmu_builder*"]
+
+[tool.setuptools.package-data]
+fmu_builder = ["templates/*", "static/**/*"]
