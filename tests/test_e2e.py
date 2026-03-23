@@ -104,6 +104,32 @@ class TestSimpleGainGeneration:
                 root = ET.parse(f).getroot()
                 assert root.attrib["modelName"] == "SimpleGain"
 
+    def test_package_fmu_with_extra_dlls(self, cfg: FmuConfig, tmp_path: Path):
+        """Verify extra DLLs are included in the FMU."""
+        xml_path = tmp_path / "modelDescription.xml"
+        generate_model_description(cfg, xml_path)
+
+        dll_path = tmp_path / "SimpleGain.dll"
+        dll_path.write_bytes(b"MAIN_DLL")
+
+        # Create dummy extra DLLs
+        libs_dir = tmp_path / "libs"
+        libs_dir.mkdir()
+        extra1 = libs_dir / "mathlib.dll"
+        extra1.write_bytes(b"MATHLIB_DLL")
+        extra2 = libs_dir / "helper.dll"
+        extra2.write_bytes(b"HELPER_DLL")
+
+        fmu_path = tmp_path / "SimpleGain.fmu"
+        package_fmu(fmu_path, xml_path, dll_path, "SimpleGain",
+                    extra_dlls=[extra1, extra2])
+
+        with zipfile.ZipFile(fmu_path, "r") as zf:
+            names = zf.namelist()
+            assert "binaries/win64/SimpleGain.dll" in names
+            assert "binaries/win64/mathlib.dll" in names
+            assert "binaries/win64/helper.dll" in names
+
 
 @pytest.mark.skipif(sys.platform != "win32", reason="Requires Windows + MSVC")
 class TestSimpleGainCompileAndRun:

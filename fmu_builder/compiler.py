@@ -78,6 +78,7 @@ def compile_fmu(
     user_source_files: list[Path],
     adapter_path: Path,
     build_dir: Path,
+    lib_files: list[Path] | None = None,
     arch: str = "amd64",
 ) -> Path:
     """Compile all C sources into a DLL.
@@ -87,6 +88,7 @@ def compile_fmu(
         user_source_files: Paths to user's .c and .h files.
         adapter_path: Path to the generated adapter.c.
         build_dir: Working directory for compilation output.
+        lib_files: Paths to .lib import libraries for external DLL dependencies.
         arch: Target architecture ("amd64" or "x86").
 
     Returns:
@@ -127,6 +129,11 @@ def compile_fmu(
     include_flags = " ".join(f'/I"{d}"' for d in include_dirs)
     source_list = " ".join(f'"{f}"' for f in c_files)
 
+    # Collect .lib files for linking external DLLs
+    lib_list = ""
+    if lib_files:
+        lib_list = " " + " ".join(f'"{lib}"' for lib in lib_files)
+
     # Build the compilation command
     # /LD  — produce DLL
     # /MT  — static CRT (no runtime dependency)
@@ -139,7 +146,7 @@ def compile_fmu(
         f'{source_list} '
         f'/Fe:"{dll_path}" '
         f'/Fo:"{build_dir}\\\\" '  # object files go to build dir
-        f'/link /DEF:NUL'  # no .def file needed
+        f'/link /DEF:NUL{lib_list}'
     )
 
     try:

@@ -47,11 +47,11 @@ Three-layer C code design:
 
 ## Module Responsibilities
 
-- `config.py` — Pydantic models that parse+validate YAML; cross-validates arg mappings against declared variables
+- `config.py` — Pydantic models that parse+validate YAML; cross-validates arg mappings against declared variables; `Library` model for external DLL deps
 - `codegen.py` — `_build_step_call()` determines call style from `FunctionArg` mappings; `generate_adapter()` renders template
 - `xmlgen.py` — `_build_variables()` assigns valueReferences (inputs 0..n-1, outputs n..n+m-1, params n+m..); 1-based indices for ModelStructure
-- `compiler.py` — Finds MSVC via env vars/registry, runs `cl.exe /LD /MT /O2`
-- `packager.py` — ZIP with `modelDescription.xml` + `binaries/win64/<name>.dll`
+- `compiler.py` — Finds MSVC via env vars/registry, runs `cl.exe /LD /MT /O2`; links external `.lib` import libraries
+- `packager.py` — ZIP with `modelDescription.xml` + `binaries/win64/<name>.dll` + extra dependency DLLs
 - `cli.py` — Typer `build` command orchestrating the full pipeline
 
 ## Testing

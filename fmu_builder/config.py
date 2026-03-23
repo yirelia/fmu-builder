@@ -109,11 +109,19 @@ class Interface(BaseModel):
         return self
 
 
+class Library(BaseModel):
+    """An external DLL dependency for the user's C code."""
+
+    dll: str  # path to .dll file (packaged into FMU at runtime)
+    lib: Optional[str] = None  # path to .lib import library (for MSVC linking)
+
+
 class Source(BaseModel):
     """Describes the source files to compile."""
 
     type: str = "c_source"
     files: list[str]
+    libraries: list[Library] = []
 
     @field_validator("type")
     @classmethod

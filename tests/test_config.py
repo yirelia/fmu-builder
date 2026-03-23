@@ -154,6 +154,28 @@ class TestFmuConfigValid:
 
         assert len(cfg.interface.inputs) == 0
 
+    def test_libraries_config(self, tmp_path):
+        data = _make_valid_config()
+        data["source"]["libraries"] = [
+            {"dll": "libs/mathlib.dll", "lib": "libs/mathlib.lib"},
+            {"dll": "libs/helper.dll"},
+        ]
+        cfg_path = _write_yaml(data, tmp_path / "fmu_config.yaml")
+        cfg = FmuConfig.from_yaml(cfg_path)
+
+        assert len(cfg.source.libraries) == 2
+        assert cfg.source.libraries[0].dll == "libs/mathlib.dll"
+        assert cfg.source.libraries[0].lib == "libs/mathlib.lib"
+        assert cfg.source.libraries[1].dll == "libs/helper.dll"
+        assert cfg.source.libraries[1].lib is None
+
+    def test_no_libraries(self, tmp_path):
+        data = _make_valid_config()
+        cfg_path = _write_yaml(data, tmp_path / "fmu_config.yaml")
+        cfg = FmuConfig.from_yaml(cfg_path)
+
+        assert cfg.source.libraries == []
+
 
 class TestFmuConfigInvalid:
     def test_missing_fmu_name(self, tmp_path):

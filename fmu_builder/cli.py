@@ -38,6 +38,22 @@ def build(
             typer.echo(f"Error: Source file not found: {sf}", err=True)
             raise typer.Exit(code=1)
 
+    # Resolve library paths relative to config file
+    lib_files: list[Path] = []
+    extra_dlls: list[Path] = []
+    for lib in cfg.source.libraries:
+        dll = config_dir / lib.dll
+        if not dll.exists():
+            typer.echo(f"Error: Library DLL not found: {dll}", err=True)
+            raise typer.Exit(code=1)
+        extra_dlls.append(dll)
+        if lib.lib:
+            lib_path = config_dir / lib.lib
+            if not lib_path.exists():
+                typer.echo(f"Error: Import library not found: {lib_path}", err=True)
+                raise typer.Exit(code=1)
+            lib_files.append(lib_path)
+
     # Phase 2+: codegen, xmlgen, compile, package
     from fmu_builder.codegen import generate_adapter
     from fmu_builder.xmlgen import generate_model_description
@@ -61,14 +77,20 @@ def build(
 
         # Compile
         typer.echo("Compiling ...")
-        dll_path = compile_fmu(cfg, source_files, adapter_path, build_path)
+        dll_path = compile_fmu(
+            cfg, source_files, adapter_path, build_path,
+            lib_files=lib_files if lib_files else None,
+        )
 
         # Package
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)
         fmu_path = output_dir / f"{cfg.fmu.name}.fmu"
         typer.echo(f"Packaging {fmu_path} ...")
-        package_fmu(fmu_path, xml_path, dll_path, cfg.fmu.name)
+        package_fmu(
+            fmu_path, xml_path, dll_path, cfg.fmu.name,
+            extra_dlls=extra_dlls if extra_dlls else None,
+        )
 
     typer.echo(f"Done! FMU created: {fmu_path}")
 
